@@ -1,4 +1,3 @@
 # chatbottest
 
-DataSet:
-[magnet:?xt=urn:btih:7690f71ea949b868080401c749e878f98de34d3d&dn=reddit%5Fdata&tr=http%3A%2F%2Ftracker.pushshift.io%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80]
+[DataSet](magnet:?xt=urn:btih:7690f71ea949b868080401c749e878f98de34d3d&dn=reddit%5fdata&tr=http%3a%2f%2ftracker.pushshift.io%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80)
