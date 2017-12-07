@@ -3,5 +3,19 @@
 DataSet:
 
 ```
-magnet:?xt=urn:btih:7690f71ea949b868080401c749e878f98de34d3d&dn=reddit%5fdata&tr=http%3a%2f%2ftracker.pushshift.io%3a6969%2fannounce&tr=udp%3a%2f%2ftracker.openbittorrent.com%3a80
+http://files.pushshift.io/reddit/comments/
+```
+
+Chatbot Base Example:
+
+```
+https://github.com/chiphuyen/stanford-tensorflow-tutorials/tree/master/assignments/chatbot
+```
+
+#To Build Data from Reddit Data
+
+Put The Downloaded Data ./Data Folder unziped and run:
+
+```python
+python data_import.py
 ```
