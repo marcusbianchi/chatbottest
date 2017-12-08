@@ -51,15 +51,15 @@ def prepare_dataset(questions, answers):
     filenames = ['train.enc', 'train.dec', 'test.enc', 'test.dec']
     files = []
     for filename in filenames:
-        files.append(open(os.path.join(config.PROCESSED_PATH, filename), 'w'))
+        files.append(open(os.path.join(config.PROCESSED_PATH, filename), 'wb'))
 
     for i in range(len(questions)):
         if i in test_ids:
-            files[2].write(questions[i] + '\n')
-            files[3].write(answers[i] + '\n')
+            files[2].write((questions[i] + '\n').encode())
+            files[3].write((questions[i] + '\n').encode())
         else:
-            files[0].write(questions[i] + '\n')
-            files[1].write(answers[i] + '\n')
+            files[0].write((questions[i] + '\n').encode())
+            files[1].write((questions[i] + '\n').encode())
 
     for file in files:
         file.close()
@@ -93,13 +93,33 @@ def basic_tokenizer(line, normalize_digits=True):
     return words
 
 
+def load_data(enc_filename, dec_filename, max_training_size=None):
+    encode_file = open(os.path.join(config.PROCESSED_PATH, enc_filename), 'rb')
+    decode_file = open(os.path.join(config.PROCESSED_PATH, dec_filename), 'rb')
+    encode, decode = encode_file.readline(), decode_file.readline()
+    data_buckets = [[] for _ in config.BUCKETS]
+    i = 0
+    while encode and decode:
+        if (i + 1) % 10000 == 0:
+            print("Bucketing conversation number", i)
+        encode_ids = [int(id_) for id_ in encode.split()]
+        decode_ids = [int(id_) for id_ in decode.split()]
+        for bucket_id, (encode_max_size, decode_max_size) in enumerate(config.BUCKETS):
+            if len(encode_ids) <= encode_max_size and len(decode_ids) <= decode_max_size:
+                data_buckets[bucket_id].append([encode_ids, decode_ids])
+                break
+        encode, decode = encode_file.readline(), decode_file.readline()
+        i += 1
+    return data_buckets
+
+
 def build_vocab(filename, normalize_digits=True):
     in_path = os.path.join(config.PROCESSED_PATH, filename)
     out_path = os.path.join(config.PROCESSED_PATH,
                             'vocab.{}'.format(filename[-3:]))
 
     vocab = {}
-    with open(in_path, 'r') as f:
+    with open(in_path, 'rb') as f:
         for line in f.readlines():
             for token in basic_tokenizer(line):
                 if not token in vocab:
@@ -107,7 +127,7 @@ def build_vocab(filename, normalize_digits=True):
                 vocab[token] += 1
 
     sorted_vocab = sorted(vocab, key=vocab.get, reverse=True)
-    with open(out_path, 'w') as f:
+    with open(out_path, 'wb') as f:
         f.write('<pad>' + '\n')
         f.write('<unk>' + '\n')
         f.write('<s>' + '\n')
@@ -126,7 +146,7 @@ def build_vocab(filename, normalize_digits=True):
 
 
 def load_vocab(vocab_path):
-    with open(vocab_path, 'r') as f:
+    with open(vocab_path, 'rb') as f:
         words = f.read().splitlines()
     return words, {words[i]: i for i in range(len(words))}
 
@@ -143,8 +163,8 @@ def token2id(data, mode):
     out_path = data + '_ids.' + mode
 
     _, vocab = load_vocab(os.path.join(config.PROCESSED_PATH, vocab_path))
-    in_file = open(os.path.join(config.PROCESSED_PATH, in_path), 'r')
-    out_file = open(os.path.join(config.PROCESSED_PATH, out_path), 'w')
+    in_file = open(os.path.join(config.PROCESSED_PATH, in_path), 'rb')
+    out_file = open(os.path.join(config.PROCESSED_PATH, out_path), 'wb')
 
     lines = in_file.read().splitlines()
     for line in lines:
@@ -166,7 +186,7 @@ def prepare_raw_data():
 
 
 def process_data():
-    print('Preparing data to be model-ready ...')prepare_raw_data
+    print('Preparing data to be model-ready ...')
     build_vocab('train.enc')
     build_vocab('train.dec')
     token2id('train', 'enc')
